@@ -1,123 +1,139 @@
-# ESP32 Dual MAX30105 Health Monitor with OLED Display, RemoteXY, and WhatsApp Alerts
+# ESP32-Based Wearable Vital Signs Monitoring Device
 
 ## Overview
 
-This project is an ESP32-based health monitoring system that measures:
+This project aims to develop a **wearable health monitoring device** that can non-invasively measure and analyze vital signs including:
 
-- Heart Rate (HR)
-- Blood Pressure (SBP/DBP)
-- Blood Oxygen Saturation (SpO2)
-- Body Temperature
+- **Blood Pressure (SBP/DBP)**
+- **Heart Rate**
+- **Blood Oxygen Saturation (SpO₂)**
+- **Body Temperature**
+- **Blood Glucose Classification (Diabetic vs Non-Diabetic)**
 
-The system uses two MAX30105 sensors to calculate Pulse Transit Time (PTT) and estimate blood pressure. It visualizes live data on an OLED screen, syncs with RemoteXY for cloud control, sends readings to Google Sheets, and triggers WhatsApp alerts when necessary.
+The system uses an ESP32 microcontroller with various sensors and communication modules to process, display, and transmit health data in real time. Features include live OLED visualization, cloud control via RemoteXY, Google Sheets logging, and WhatsApp alerts for abnormal values.
 
-## Hardware Requirements
+---
 
-- ESP32 board  
-- 2 × MAX30105 sensors  
-- OLED display (SSD1306, 128x64, I2C)  
-- Push button  
-- Resistors (if needed)  
-- Power source  
-- Breadboard and jumper wires
+## Hardware Components
 
-## Libraries Used
+- ESP32 board
+- 2 × MAX30105 PPG sensors
+- IR temperature sensor
+- OLED Display (128x64 I2C, SSD1306)
+- Push button
+- Optional: Capacitive touch pad (for wake-up)
+- Power supply (e.g., battery or USB)
 
-Ensure you have the following Arduino libraries installed:
+---
 
-- `WiFi.h`  
-- `RemoteXY`  
-- `Wire.h`  
-- `MAX30105.h`  
-- `PeakDetection.h`  
-- `Adafruit_GFX.h`  
-- `Adafruit_SSD1306.h`  
-- `OLED_SSD1306_Chart.h`  
-- `HTTPClient.h`  
-- `spo2_algorithm.h`
+## Key Features
 
-## Features
+- 📊 Real-time display of PPG signals on OLED screen
+- 🧠 Blood pressure estimation using Pulse Transit Time (PTT) and dual MAX30105 sensors
+- 🌡️ Continuous body temperature tracking
+- 🟢 Oxygen saturation (SpO₂) measurement
+- ❤️ Heart rate monitoring compared against clinical pulse oximeter readings
+- 📲 Google Sheets integration via HTTP (Apps Script)
+- 📶 Remote control and monitoring through RemoteXY Cloud
+- 🔔 WhatsApp alerts via CallMeBot API
+- 🌙 Auto sleep mode for power saving
 
-- 📈 **Live Graph Display**: IR sensor signals are displayed on the OLED in real time.  
-- 🩺 **Dual-Sensor PTT Estimation**: Uses peak detection from both sensors to compute PTT and estimate SBP/DBP.  
-- 🌡️ **Temperature Monitoring**: Averages temperature readings from both sensors.  
-- 📶 **Wi-Fi Sync**: Connects to the internet for data logging and remote control.  
-- 🟢 **RemoteXY Cloud Interface**: Monitor values remotely.  
-- 📤 **Google Sheets Logging**: Sends readings to a Google Sheet using Google Apps Script.  
-- 📲 **WhatsApp Alerts**: Sends health status notifications through CallMeBot API.
+---
+
+## Software & Libraries
+
+Make sure to install the following Arduino libraries:
+
+- `MAX30105`
+- `spo2_algorithm`
+- `PeakDetection`
+- `Wire`, `WiFi`, `HTTPClient`
+- `Adafruit_GFX`, `Adafruit_SSD1306`
+- `RemoteXY`
+- `OLED_SSD1306_Chart`
+
+---
 
 ## Configuration
 
 ### Wi-Fi
-Update your credentials:
 ```cpp
-char ssid[] = "Your_WiFi_Name";
-char pass[] = "Your_WiFi_Password";
+char ssid[] = "Your_SSID";
+char pass[] = "Your_PASSWORD";
 ````
 
 ### RemoteXY
 
-Replace with your own token and settings:
-
 ```cpp
-#define REMOTEXY_WIFI_SSID "Your_WiFi"
-#define REMOTEXY_WIFI_PASSWORD "Your_WiFi_Password"
+#define REMOTEXY_WIFI_SSID "Your_SSID"
+#define REMOTEXY_WIFI_PASSWORD "Your_PASSWORD"
 #define REMOTEXY_CLOUD_SERVER "cloud.remotexy.com"
 #define REMOTEXY_CLOUD_PORT 6376
 #define REMOTEXY_CLOUD_TOKEN "Your_RemoteXY_Token"
 ```
 
-### Google Sheets
-
-Get your script ID from the published Google Apps Script:
+### Google Sheets (via Apps Script)
 
 ```cpp
-String GAS_ID = "Your_Google_Script_ID";
+String GAS_ID = "Your_Script_ID";
 ```
 
-### WhatsApp Alert via CallMeBot
-
-Get your API key from [https://www.callmebot.com](https://www.callmebot.com):
+### WhatsApp Alert (via CallMeBot)
 
 ```cpp
-String apiKey = "Your_API_Key";
-String phone_number = "+Your_WhatsApp_Number";
+String phone_number = "+YourPhone";
+String apiKey = "YourCallMeBotAPIKey";
 ```
 
-## Usage
+---
 
-1. Upload the code to the ESP32 using Arduino IDE.
-2. Power on the device and wait for the OLED to display connection status.
-3. Wear the sensors — the system will align and check signal strength.
-4. Press the button to start data acquisition.
-5. Readings will be:
+## Experimental Results
 
-   * Displayed on OLED
-   * Uploaded to Google Sheets
-   * Sent via WhatsApp
-   * Synced to RemoteXY cloud
+### 📌 Blood Pressure Estimation
 
-## Sleep Mode
+* Study on **24 individuals**, with **106 samples**.
+* **Mean Error**:
 
-The ESP32 enters deep sleep after a set time (`wake_time`), and wakes on:
+  * Systolic: `-2.19 mmHg` ± `10.10`
+  * Diastolic: `-2.50 mmHg` ± `9.81`
 
-* Capacitive touch pad event
-* Timer
+### 📌 Blood Glucose Classification
 
-Adjust sleep settings here:
+* 850 nm IR LED: **Not suitable** for detecting blood glucose levels in humans.
+* 940 nm IR LED:
 
-```cpp
-int SleepingTime = 30; // seconds
-int wake_time = 2; // minutes until forced sleep
-```
+  * **PPG detected in non-diabetics**
+  * **No signal in diabetics**
+* Suitable for **classification only**, not precise glucose quantification.
 
-## Notes
+### 📌 Heart Rate
 
-* Blood pressure estimation is **not medically certified**.
-* PTT-based BP estimation can vary with placement and signal strength.
-* Ensure proper finger placement on sensors for accurate results.
+* 106 samples from 24 individuals.
+* Compared with clinical pulse oximeter.
+* **Mean Error**: `-3.13 bpm` ± `5.1`
 
-## Credits
+### 📌 Body Temperature & SpO₂
 
-Developed by: Hosam Salah
-Powered by: ESP32, MAX30105, and CallMeBot API
+* **Temperature Error**: `-1.20°C` average
+* **SpO₂ Error**: `-0.92%` average
+
+---
+
+## Conclusion
+
+This project successfully developed a wearable device capable of monitoring key vital signs. The device combines multiple sensors to provide real-time data on blood pressure, heart rate, SpO₂, temperature, and blood glucose classification. The use of **non-invasive** techniques ensures comfort and usability.
+
+While the device shows promising results, limitations exist:
+
+* **Small sample size** (24 individuals) requires expansion for broader clinical validation.
+* **Environmental and physiological variability** may affect readings.
+
+Despite these challenges, the prototype showcases the potential of wearable health technology in **empowering users** with insights into their health. With further development and integration of machine learning models, this device can contribute to **preventive healthcare** and **remote patient monitoring**.
+
+---
+
+## Author
+
+Hosam Salah
+📧 [hosam.s.alsayed@gmail.com](mailto:hosam.s.alsayed@gmail.com)
+📍 Cairo, Egypt
