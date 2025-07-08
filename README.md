@@ -6,16 +6,15 @@ This project presents a non-invasive wearable device designed to monitor key vit
 
 ### 📌 Table of Contents
 
-* [About the Project](#about-the-project)
-* [Motivation](#motivation)
-* [Features](#features)
-* [System Design](#system-design)
-* [Components Used](#components-used)
-* [Methodology](#methodology)
-* [Results](#results)
-* [Limitations](#limitations)
-* [Future Work](#future-work)
-* [Team Members](#team-members)
+- About the Project
+- Motivation
+- Features
+- System Design
+- Components Used
+- Methodology
+- Results
+- Limitations
+- Future Work
 
 ---
 
